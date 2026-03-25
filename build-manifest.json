@@ -1,6 +1,12 @@
 {
   "buildDate": "2026-03-25",
-  "productName": "FretWear Tracker",
+  "product": {
+    "name": "FretWear Tracker",
+    "tagline": "Track guitar fret wear with computer vision",
+    "github": "https://github.com/YDP-Chris/fretwear-tracker",
+    "url": null,
+    "status": "staged"
+  },
   "description": "Photo-based guitar fret wear tracking application",
   "type": "web-app",
   "technology": "HTML/CSS/JavaScript",
