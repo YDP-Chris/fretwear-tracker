@@ -1,0 +1,27 @@
+{
+  "buildDate": "2026-03-25",
+  "productName": "FretWear Tracker",
+  "description": "Photo-based guitar fret wear tracking application",
+  "type": "web-app",
+  "technology": "HTML/CSS/JavaScript",
+  "features": [
+    "Photo-based wear detection",
+    "Guided camera capture",
+    "Traffic light status system",
+    "Multiple guitar tracking",
+    "Offline storage (IndexedDB)",
+    "Data export/import",
+    "Mobile-first responsive design",
+    "PWA capabilities"
+  ],
+  "requirements": [
+    "Modern browser with camera support",
+    "HTTPS for camera access",
+    "IndexedDB support",
+    "Mobile or desktop device"
+  ],
+  "targetAudience": "Guitar players and technicians",
+  "builderAgent": "Foundry AI",
+  "specDriven": true,
+  "functionalCode": true
+}

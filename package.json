@@ -1,0 +1,29 @@
+{
+  "name": "fretwear-tracker",
+  "version": "1.0.0",
+  "description": "Photo-based guitar fret wear tracking application",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "start": "python3 -m http.server 8080",
+    "build": "echo 'Static site - no build required'"
+  },
+  "keywords": [
+    "guitar",
+    "fret wear",
+    "maintenance",
+    "photo tracking",
+    "music instruments"
+  ],
+  "author": "Foundry AI",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ydp-chris/foundry-builds"
+  }
+}

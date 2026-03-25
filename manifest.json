@@ -1,0 +1,31 @@
+{
+  "name": "FretWear Tracker",
+  "short_name": "FretWear",
+  "description": "Track your guitar's fret wear with photos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e3a8a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9IiMxZTNhOGEiLz4KPHN2ZyB4PSI0IiB5PSI0IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgdmlld0JveD0iMCAwIDI0IDI0Ij4KPHA+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik05IDE5VjZsMTItM3YxM005IDE5YzAgMS4xMDUtMS4zNDMgMi0zIDJzLTMtLjg5NS0zLTIgMS4zNDMtMiAzLTIgMyAuODk1IDMgMnptMTItM2MwIDEuMTA1LTEuMzQzIDItMyAycy0zLS44OTUtMy0yIDEuMzQzLTIgMy0yIDMgLjg5NSAzIDJaTTkgMTBsMTItMyIvPjwvc3ZnPgo8L3N2Zz4K",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9IiMxZTNhOGEiLz4KPHN2ZyB4PSI0IiB5PSI0IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIGZpbGw9IndoaXRlIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgdmlld0JveD0iMCAwIDI0IDI0Ij4KPHA+PHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiIGQ9Ik05IDE5VjZsMTItM3YxM005IDE5YzAgMS4xMDUtMS4zNDMgMi0zIDJzLTMtLjg5NS0zLTIgMS4zNDMtMiAzLTIgMyAuODk1IDMgMnptMTItM2MwIDEuMTA1LTEuMzQzIDItMyAycy0zLS44OTUtMy0yIDEuMzQzLTIgMy0yIDMgLjg5NSAzIDJaTTkgMTBsMTItMyIvPjwvc3ZnPgo8L3N2Zz4K",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["music", "utilities"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzc1IiBoZWlnaHQ9IjY2NyIgdmlld0JveD0iMCAwIDM3NSA2NjciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzNzUiIGhlaWdodD0iNjY3IiBmaWxsPSIjZjlmYWZiIi8+CjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIzNzUiIGhlaWdodD0iNjQiIGZpbGw9IiMxZTNhOGEiLz4KPHN2ZyB4PSIxNjAiIHk9IjEwMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjMWUzYThhIiB2aWV3Qm94PSIwIDAgMjQgMjQiPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIgZmlsbD0iIzFlM2E4YSIvPgo8cGF0aCBkPSJNOSAxOVY2bDEyLTN2MTNNOSAxOWMwIDEuMTA1LTEuMzQzIDItMyAycy0zLS44OTUtMy0yIDEuMzQzLTIgMy0yIDMgLjg5NSAzIDJ6bTEyLTNjMCAxLjEwNS0xLjM0MyAyLTMgMnMtMy0uODk1LTMtMiAxLjM0My0yIDMtMiAzIC44OTUgMyAyek05IDEwbDEyLTMiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4KPHN2ZyB4PSI0MCIgeT0iMzIwIiB3aWR0aD0iMjk1IiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjk1IDYwIj4KPHI+PHJlY3Qgd2lkdGg9IjI5NSIgaGVpZ2h0PSI2MCIgcng9IjgiIGZpbGw9IiMxZTNhOGEiLz4KPHN2ZyB4PSIyMCIgeT0iMTciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0id2hpdGUiIHZpZXdCb3g9IjAgMCAyNCAyNCI+CjxwYXRoIGQ9Ik0xMiA2djZtMCAwdjZtMC02aDZtLTYgMEg2IiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cjx0ZXh0IHg9IjEwMCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJJbnRlciIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIj5BZGQgWW91ciBGaXJzdCBHdWl0YXI8L3RleHQ+CjwvcmVjdD4KPC9zdmc+",
+      "sizes": "375x667",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}

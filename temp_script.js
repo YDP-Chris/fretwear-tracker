@@ -1,0 +1,1086 @@
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a',
+                        secondary: '#f59e0b',
+                        success: '#059669',
+                        warning: '#d97706',
+                        danger: '#dc2626'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .camera-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px dashed #f59e0b;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .fret-guide {
+            position: absolute;
+            border-left: 2px solid #f59e0b;
+            height: 100%;
+            opacity: 0.7;
+        }
+
+        .comparison-slider {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .comparison-handle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #f59e0b;
+            cursor: ew-resize;
+            z-index: 10;
+        }
+
+        .status-green { @apply bg-success text-white; }
+        .status-yellow { @apply bg-warning text-white; }
+        .status-red { @apply bg-danger text-white; }
+
+        .photo-thumbnail {
+            aspect-ratio: 4/3;
+            object-fit: cover;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .loading-dot {
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- App Container -->
+    <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-lg">
+
+        <!-- Header -->
+        <header class="bg-primary text-white p-4 sticky top-0 z-20">
+            <div class="flex items-center justify-between">
+                <button id="back-btn" class="hidden w-8 h-8 rounded-full hover:bg-blue-700 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                <h1 id="page-title" class="text-xl font-bold">FretWear Tracker</h1>
+                <button id="menu-btn" class="w-8 h-8 rounded-full hover:bg-blue-700 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="pb-20">
+
+            <!-- Home View -->
+            <div id="home-view" class="view">
+                <div class="p-6">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 mx-auto bg-primary rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Track Your Guitar's Fret Wear</h2>
+                        <p class="text-gray-600">Know exactly when your frets need maintenance with photo-based wear detection.</p>
+                    </div>
+
+                    <div id="guitar-list" class="space-y-4 mb-6"></div>
+
+                    <button id="add-guitar-btn" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-800 transition-colors flex items-center justify-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        <span>Add Your First Guitar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Guitar View -->
+            <div id="add-guitar-view" class="view hidden">
+                <form id="add-guitar-form" class="p-6 space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Guitar Make</label>
+                        <input type="text" name="make" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g. Fender, Gibson, Taylor">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                        <input type="text" name="model" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g. Stratocaster, Les Paul">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                        <input type="number" name="year" min="1900" max="2030" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g. 2020">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fret Condition</label>
+                        <select name="condition" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">Select condition</option>
+                            <option value="new">Brand New Frets</option>
+                            <option value="excellent">Excellent (recently serviced)</option>
+                            <option value="good">Good (some play time)</option>
+                            <option value="fair">Fair (noticeable wear)</option>
+                            <option value="poor">Poor (needs work)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Fret Work (Optional)</label>
+                        <input type="date" name="setupDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-800 transition-colors">
+                        Add Guitar & Take Baseline Photos
+                    </button>
+                </form>
+            </div>
+
+            <!-- Guitar Detail View -->
+            <div id="guitar-detail-view" class="view hidden">
+                <div class="p-6">
+                    <div id="guitar-info" class="mb-6"></div>
+
+                    <div class="space-y-4">
+                        <button id="take-photos-btn" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-800 transition-colors flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Take New Photos</span>
+                        </button>
+
+                        <div id="photo-timeline" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photo Capture View -->
+            <div id="photo-capture-view" class="view hidden">
+                <div class="relative">
+                    <video id="camera-feed" class="w-full h-80 object-cover bg-black" autoplay playsinline muted></video>
+
+                    <!-- Camera Overlay Guides -->
+                    <div class="camera-overlay w-80 h-60">
+                        <div class="w-full h-full flex items-center justify-center">
+                            <div class="text-secondary text-sm font-medium bg-black bg-opacity-50 px-2 py-1 rounded">
+                                Position frets in frame
+                            </div>
+                        </div>
+                        <!-- Fret position guides -->
+                        <div class="fret-guide" style="left: 15%"></div>
+                        <div class="fret-guide" style="left: 25%"></div>
+                        <div class="fret-guide" style="left: 35%"></div>
+                        <div class="fret-guide" style="left: 45%"></div>
+                        <div class="fret-guide" style="left: 55%"></div>
+                        <div class="fret-guide" style="left: 65%"></div>
+                        <div class="fret-guide" style="left: 75%"></div>
+                        <div class="fret-guide" style="left: 85%"></div>
+                    </div>
+
+                    <canvas id="photo-canvas" class="hidden"></canvas>
+                </div>
+
+                <div class="p-6">
+                    <div id="capture-instructions" class="mb-6">
+                        <div class="bg-blue-50 border-l-4 border-primary p-4 mb-4">
+                            <h3 class="font-semibold text-primary mb-2">Photo Guidance</h3>
+                            <ul class="text-sm text-gray-700 space-y-1">
+                                <li>• Hold guitar at eye level</li>
+                                <li>• Align frets with guide lines</li>
+                                <li>• Ensure good lighting (no shadows)</li>
+                                <li>• Keep camera steady</li>
+                            </ul>
+                        </div>
+
+                        <div id="lighting-check" class="mb-4"></div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <button id="capture-btn" class="flex-1 bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-800 transition-colors flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                            </svg>
+                            <span>Capture Photo</span>
+                        </button>
+
+                        <button id="cancel-capture-btn" class="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis View -->
+            <div id="analysis-view" class="view hidden">
+                <div class="p-6">
+                    <div id="analysis-results" class="space-y-6">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-6 text-center">
+                <div class="flex justify-center mb-4">
+                    <div class="flex space-x-2">
+                        <div class="w-3 h-3 bg-primary rounded-full loading-dot"></div>
+                        <div class="w-3 h-3 bg-primary rounded-full loading-dot"></div>
+                        <div class="w-3 h-3 bg-primary rounded-full loading-dot"></div>
+                    </div>
+                </div>
+                <p id="loading-text" class="text-gray-600">Analyzing photos...</p>
+            </div>
+        </div>
+
+        <!-- Menu Modal -->
+        <div id="menu-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+            <div class="bg-white w-full rounded-t-xl p-6">
+                <div class="space-y-4">
+                    <button id="export-data-btn" class="w-full text-left py-3 px-4 hover:bg-gray-50 rounded-lg flex items-center space-x-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span>Export Guitar Data</span>
+                    </button>
+
+                    <button id="import-data-btn" class="w-full text-left py-3 px-4 hover:bg-gray-50 rounded-lg flex items-center space-x-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                        </svg>
+                        <span>Import Guitar Data</span>
+                    </button>
+
+                    <button id="about-btn" class="w-full text-left py-3 px-4 hover:bg-gray-50 rounded-lg flex items-center space-x-3">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>About FretWear Tracker</span>
+                    </button>
+
+                    <button id="close-menu-btn" class="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-semibold">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Input (Hidden) -->
+        <input type="file" id="file-input" accept=".json" class="hidden">
+    </div>
+
+    <script>
+        // Application State
+        let currentView = 'home';
+        let currentGuitar = null;
+        let cameraStream = null;
+        let db = null;
+
+        // Initialize IndexedDB
+        const initDB = () => {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('FretWearTracker', 1);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+
+                    // Create guitars store
+                    if (!db.objectStoreNames.contains('guitars')) {
+                        const guitarStore = db.createObjectStore('guitars', { keyPath: 'id', autoIncrement: true });
+                        guitarStore.createIndex('make', 'make', { unique: false });
+                        guitarStore.createIndex('model', 'model', { unique: false });
+                    }
+
+                    // Create photos store
+                    if (!db.objectStoreNames.contains('photos')) {
+                        const photoStore = db.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+                        photoStore.createIndex('guitarId', 'guitarId', { unique: false });
+                        photoStore.createIndex('date', 'date', { unique: false });
+                    }
+
+                    // Create analysis store
+                    if (!db.objectStoreNames.contains('analysis')) {
+                        const analysisStore = db.createObjectStore('analysis', { keyPath: 'id', autoIncrement: true });
+                        analysisStore.createIndex('guitarId', 'guitarId', { unique: false });
+                        analysisStore.createIndex('date', 'date', { unique: false });
+                    }
+                };
+            });
+        };
+
+        // Database Operations
+        const dbOperations = {
+            addGuitar: (guitar) => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['guitars'], 'readwrite');
+                    const store = transaction.objectStore('guitars');
+                    const request = store.add({
+                        ...guitar,
+                        createdAt: new Date().toISOString(),
+                        lastPhotos: null,
+                        status: 'new'
+                    });
+
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            getGuitars: () => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['guitars'], 'readonly');
+                    const store = transaction.objectStore('guitars');
+                    const request = store.getAll();
+
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            getGuitar: (id) => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['guitars'], 'readonly');
+                    const store = transaction.objectStore('guitars');
+                    const request = store.get(id);
+
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            addPhoto: (photo) => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['photos'], 'readwrite');
+                    const store = transaction.objectStore('photos');
+                    const request = store.add({
+                        ...photo,
+                        date: new Date().toISOString()
+                    });
+
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            getPhotos: (guitarId) => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['photos'], 'readonly');
+                    const store = transaction.objectStore('photos');
+                    const index = store.index('guitarId');
+                    const request = index.getAll(guitarId);
+
+                    request.onsuccess = () => {
+                        const photos = request.result.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        resolve(photos);
+                    };
+                    request.onerror = () => reject(request.error);
+                });
+            },
+
+            addAnalysis: (analysis) => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(['analysis'], 'readwrite');
+                    const store = transaction.objectStore('analysis');
+                    const request = store.add({
+                        ...analysis,
+                        date: new Date().toISOString()
+                    });
+
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+        };
+
+        // Navigation
+        const showView = (viewName, data = null) => {
+            // Hide all views
+            document.querySelectorAll('.view').forEach(view => view.classList.add('hidden'));
+
+            // Show target view
+            document.getElementById(`${viewName}-view`).classList.remove('hidden');
+
+            // Update header
+            const backBtn = document.getElementById('back-btn');
+            const pageTitle = document.getElementById('page-title');
+
+            if (viewName === 'home') {
+                backBtn.classList.add('hidden');
+                pageTitle.textContent = 'FretWear Tracker';
+            } else {
+                backBtn.classList.remove('hidden');
+
+                switch(viewName) {
+                    case 'add-guitar':
+                        pageTitle.textContent = 'Add Guitar';
+                        break;
+                    case 'guitar-detail':
+                        pageTitle.textContent = data ? `${data.make} ${data.model}` : 'Guitar Details';
+                        break;
+                    case 'photo-capture':
+                        pageTitle.textContent = 'Take Photos';
+                        break;
+                    case 'analysis':
+                        pageTitle.textContent = 'Analysis Results';
+                        break;
+                }
+            }
+
+            currentView = viewName;
+
+            // Load view-specific data
+            switch(viewName) {
+                case 'home':
+                    loadGuitarList();
+                    break;
+                case 'guitar-detail':
+                    loadGuitarDetail(data);
+                    break;
+                case 'photo-capture':
+                    initCamera();
+                    break;
+                case 'analysis':
+                    // Analysis data passed in data parameter
+                    displayAnalysisResults(data);
+                    break;
+            }
+        };
+
+        // Guitar Management
+        const loadGuitarList = async () => {
+            try {
+                const guitars = await dbOperations.getGuitars();
+                const guitarList = document.getElementById('guitar-list');
+                const addBtn = document.getElementById('add-guitar-btn');
+
+                if (guitars.length === 0) {
+                    guitarList.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                            <p>No guitars added yet</p>
+                            <p class="text-sm">Add your first guitar to start tracking fret wear</p>
+                        </div>
+                    `;
+                    addBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg><span>Add Your First Guitar</span>';
+                } else {
+                    guitarList.innerHTML = guitars.map(guitar => {
+                        const statusClass = guitar.status === 'good' ? 'status-green' :
+                                          guitar.status === 'warning' ? 'status-yellow' :
+                                          guitar.status === 'danger' ? 'status-red' : 'bg-gray-500';
+
+                        const statusText = guitar.status === 'good' ? 'Good' :
+                                         guitar.status === 'warning' ? 'Monitor' :
+                                         guitar.status === 'danger' ? 'Maintenance' : 'New';
+
+                        return `
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="openGuitar(${guitar.id})">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">${guitar.make} ${guitar.model}</h3>
+                                        <p class="text-sm text-gray-600">${guitar.year ? guitar.year + ' • ' : ''}${guitar.condition}</p>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            ${guitar.lastPhotos ? `Photos: ${new Date(guitar.lastPhotos).toLocaleDateString()}` : 'No photos yet'}
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-col items-end space-y-2">
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium ${statusClass}">${statusText}</span>
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    addBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg><span>Add Another Guitar</span>';
+                }
+            } catch (error) {
+                console.error('Error loading guitars:', error);
+            }
+        };
+
+        const openGuitar = async (guitarId) => {
+            try {
+                const guitar = await dbOperations.getGuitar(guitarId);
+                currentGuitar = guitar;
+                showView('guitar-detail', guitar);
+            } catch (error) {
+                console.error('Error loading guitar:', error);
+            }
+        };
+
+        const loadGuitarDetail = async (guitar) => {
+            const guitarInfo = document.getElementById('guitar-info');
+            const photoTimeline = document.getElementById('photo-timeline');
+
+            // Display guitar info
+            guitarInfo.innerHTML = `
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h2 class="text-xl font-bold text-gray-900 mb-2">${guitar.make} ${guitar.model}</h2>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Year:</span>
+                            <span class="ml-2 font-medium">${guitar.year || 'Not specified'}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Condition:</span>
+                            <span class="ml-2 font-medium capitalize">${guitar.condition}</span>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-gray-600">Last Fret Work:</span>
+                            <span class="ml-2 font-medium">${guitar.setupDate ? new Date(guitar.setupDate).toLocaleDateString() : 'Not specified'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Load photo timeline
+            try {
+                const photos = await dbOperations.getPhotos(guitar.id);
+
+                if (photos.length === 0) {
+                    photoTimeline.innerHTML = `
+                        <div class="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <p class="mb-1">No photos yet</p>
+                            <p class="text-sm">Take your first photos to establish a baseline</p>
+                        </div>
+                    `;
+                } else {
+                    photoTimeline.innerHTML = `
+                        <div class="space-y-4">
+                            <h3 class="font-semibold text-gray-900">Photo Timeline</h3>
+                            ${photos.map((photo, index) => `
+                                <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="text-sm font-medium text-gray-900">
+                                            ${index === 0 ? 'Latest Photos' : `${Math.floor((Date.now() - new Date(photo.date)) / (1000 * 60 * 60 * 24))} days ago`}
+                                        </span>
+                                        <span class="text-xs text-gray-500">${new Date(photo.date).toLocaleDateString()}</span>
+                                    </div>
+                                    <img src="${photo.dataUrl}" class="w-full photo-thumbnail rounded-lg" alt="Fret photo">
+                                    ${photo.analysis ? `
+                                        <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+                                            <div class="flex items-center space-x-2 mb-2">
+                                                <span class="px-2 py-1 rounded text-xs font-medium ${getStatusClass(photo.analysis.status)}">${photo.analysis.status}</span>
+                                                <span class="text-sm text-gray-600">Confidence: ${Math.round(photo.analysis.confidence)}%</span>
+                                            </div>
+                                            <p class="text-sm text-gray-700">${photo.analysis.recommendation}</p>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading photos:', error);
+                photoTimeline.innerHTML = '<div class="text-red-500">Error loading photos</div>';
+            }
+        };
+
+        const getStatusClass = (status) => {
+            switch(status.toLowerCase()) {
+                case 'good': return 'status-green';
+                case 'monitor': case 'warning': return 'status-yellow';
+                case 'maintenance': case 'danger': return 'status-red';
+                default: return 'bg-gray-500 text-white';
+            }
+        };
+
+        // Camera Functions
+        const initCamera = async () => {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: 'environment', // Use back camera
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+
+                cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('camera-feed');
+                video.srcObject = cameraStream;
+
+                // Start lighting quality check
+                startLightingCheck();
+
+            } catch (error) {
+                console.error('Camera access error:', error);
+                alert('Camera access is required to take photos. Please allow camera access and try again.');
+            }
+        };
+
+        const startLightingCheck = () => {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('photo-canvas');
+            const ctx = canvas.getContext('2d');
+            const lightingCheck = document.getElementById('lighting-check');
+
+            const checkLighting = () => {
+                if (video.videoWidth && video.videoHeight) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    let brightness = 0;
+
+                    // Calculate average brightness
+                    for (let i = 0; i < data.length; i += 4) {
+                        brightness += (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    }
+                    brightness /= (data.length / 4);
+
+                    let status, message, className;
+
+                    if (brightness < 80) {
+                        status = 'Too Dark';
+                        message = 'Move to better lighting or turn on more lights';
+                        className = 'bg-red-50 border-red-200 text-red-800';
+                    } else if (brightness > 200) {
+                        status = 'Too Bright';
+                        message = 'Reduce direct light or move to softer lighting';
+                        className = 'bg-yellow-50 border-yellow-200 text-yellow-800';
+                    } else {
+                        status = 'Good Lighting';
+                        message = 'Lighting conditions are optimal for photos';
+                        className = 'bg-green-50 border-green-200 text-green-800';
+                    }
+
+                    lightingCheck.innerHTML = `
+                        <div class="border rounded-lg p-3 ${className}">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 rounded-full ${brightness >= 80 && brightness <= 200 ? 'bg-green-500' : 'bg-red-500'}"></div>
+                                <span class="text-sm font-medium">${status}</span>
+                            </div>
+                            <p class="text-xs mt-1">${message}</p>
+                        </div>
+                    `;
+                }
+            };
+
+            // Check lighting every 500ms
+            const lightingInterval = setInterval(checkLighting, 500);
+
+            // Store interval ID to clear later
+            video.lightingInterval = lightingInterval;
+        };
+
+        const capturePhoto = () => {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('photo-canvas');
+            const ctx = canvas.getContext('2d');
+
+            if (video.videoWidth && video.videoHeight) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+
+                // Convert to JPEG and compress
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                // Stop camera
+                stopCamera();
+
+                // Process the photo
+                processPhoto(dataUrl);
+            }
+        };
+
+        const stopCamera = () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+
+            // Clear lighting check interval
+            const video = document.getElementById('camera-feed');
+            if (video.lightingInterval) {
+                clearInterval(video.lightingInterval);
+                video.lightingInterval = null;
+            }
+        };
+
+        const processPhoto = async (dataUrl) => {
+            showLoading('Processing photo...');
+
+            try {
+                // Save photo to database
+                const photoId = await dbOperations.addPhoto({
+                    guitarId: currentGuitar.id,
+                    dataUrl: dataUrl,
+                    type: 'progress' // or 'baseline' for first photos
+                });
+
+                // Simulate wear analysis (in a real app, this would use computer vision)
+                const analysis = await analyzeWear(dataUrl);
+
+                // Save analysis
+                await dbOperations.addAnalysis({
+                    guitarId: currentGuitar.id,
+                    photoId: photoId,
+                    ...analysis
+                });
+
+                hideLoading();
+
+                // Show analysis results
+                showView('analysis', analysis);
+
+            } catch (error) {
+                console.error('Error processing photo:', error);
+                hideLoading();
+                alert('Error processing photo. Please try again.');
+            }
+        };
+
+        // Wear Analysis (Simplified for demonstration)
+        const analyzeWear = async (photoDataUrl) => {
+            return new Promise((resolve) => {
+                // Simulate analysis delay
+                setTimeout(() => {
+                    // Get existing photos for comparison
+                    dbOperations.getPhotos(currentGuitar.id).then(photos => {
+                        const isFirstPhoto = photos.length <= 1;
+
+                        if (isFirstPhoto) {
+                            // First photo - establish baseline
+                            resolve({
+                                status: 'Good',
+                                confidence: 95,
+                                recommendation: 'Baseline established. Take photos monthly to track wear progression.',
+                                wearLevel: 0,
+                                specificFindings: ['Excellent fret condition', 'Clear crown definition', 'No visible wear patterns'],
+                                nextAction: 'Take photos in 4-6 weeks to begin tracking wear patterns.',
+                                isBaseline: true
+                            });
+                        } else {
+                            // Simulate wear detection based on how many photos exist
+                            const photoCount = photos.length;
+                            const simulatedWear = Math.min(photoCount * 10, 80); // Simulate gradual wear
+
+                            let status, recommendation, confidence;
+
+                            if (simulatedWear < 25) {
+                                status = 'Good';
+                                confidence = 85 + Math.random() * 10;
+                                recommendation = 'Frets are in excellent condition. Continue monitoring every 4-6 weeks.';
+                            } else if (simulatedWear < 50) {
+                                status = 'Monitor';
+                                confidence = 78 + Math.random() * 12;
+                                recommendation = 'Minor wear detected on frets 1-3. Monitor closely, schedule maintenance in 3-6 months.';
+                            } else {
+                                status = 'Maintenance';
+                                confidence = 82 + Math.random() * 8;
+                                recommendation = 'Significant wear detected. Schedule fret leveling/crowning with a guitar technician.';
+                            }
+
+                            resolve({
+                                status,
+                                confidence: Math.round(confidence),
+                                recommendation,
+                                wearLevel: simulatedWear,
+                                specificFindings: generateSpecificFindings(simulatedWear),
+                                nextAction: status === 'Maintenance' ?
+                                          'Schedule professional fret work within 2-4 weeks.' :
+                                          'Continue monthly photo tracking.',
+                                comparedTo: `${photoCount - 1} previous photo${photoCount > 2 ? 's' : ''}`
+                            });
+                        });
+                    });
+                }, 2000); // Simulate 2 second analysis
+            });
+        };
+
+        const generateSpecificFindings = (wearLevel) => {
+            const findings = [];
+
+            if (wearLevel < 25) {
+                findings.push('Excellent crown definition on all frets');
+                findings.push('No visible flat spots or indentations');
+                findings.push('Consistent fret height across neck');
+            } else if (wearLevel < 50) {
+                findings.push('Minor flattening on frets 1-3 (playing position wear)');
+                findings.push('Crown definition remains good on frets 4-12');
+                findings.push('No string binding or buzzing expected');
+            } else {
+                findings.push('Significant wear on frets 1-5');
+                findings.push('Flat spots visible under strings');
+                findings.push('Possible intonation and playability issues');
+            }
+
+            return findings;
+        };
+
+        const displayAnalysisResults = (analysis) => {
+            const resultsContainer = document.getElementById('analysis-results');
+            const statusClass = getStatusClass(analysis.status);
+
+            resultsContainer.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4 ${statusClass}">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${analysis.status === 'Good' ?
+                                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>' :
+                                analysis.status === 'Monitor' ?
+                                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>' :
+                                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                            }
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">${analysis.status} Condition</h2>
+                    <p class="text-gray-600">Analysis confidence: ${analysis.confidence}%</p>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2">Recommendation</h3>
+                        <p class="text-gray-700">${analysis.recommendation}</p>
+                    </div>
+
+                    ${analysis.specificFindings ? `
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 mb-3">Detailed Findings</h3>
+                            <ul class="space-y-2">
+                                ${analysis.specificFindings.map(finding => `
+                                    <li class="flex items-start space-x-2">
+                                        <div class="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                                        <span class="text-sm text-gray-700">${finding}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    <div class="bg-blue-50 border-l-4 border-primary p-4">
+                        <h3 class="font-semibold text-primary mb-2">Next Steps</h3>
+                        <p class="text-blue-800 text-sm">${analysis.nextAction}</p>
+                    </div>
+
+                    ${analysis.comparedTo ? `
+                        <div class="text-center text-sm text-gray-500">
+                            <p>Compared to ${analysis.comparedTo}</p>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="mt-8 space-y-3">
+                    <button onclick="showView('guitar-detail', currentGuitar)" class="w-full bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-800 transition-colors">
+                        Back to Guitar
+                    </button>
+                    <button onclick="showView('photo-capture')" class="w-full border border-primary text-primary py-3 px-4 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+                        Take More Photos
+                    </button>
+                </div>
+            `;
+        };
+
+        // Utility Functions
+        const showLoading = (text = 'Loading...') => {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        };
+
+        const hideLoading = () => {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        };
+
+        const showMenu = () => {
+            document.getElementById('menu-modal').classList.remove('hidden');
+        };
+
+        const hideMenu = () => {
+            document.getElementById('menu-modal').classList.add('hidden');
+        };
+
+        // Data Export/Import
+        const exportData = async () => {
+            try {
+                const guitars = await dbOperations.getGuitars();
+                const allPhotos = [];
+                const allAnalysis = [];
+
+                for (const guitar of guitars) {
+                    const photos = await dbOperations.getPhotos(guitar.id);
+                    allPhotos.push(...photos);
+                }
+
+                const exportData = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    guitars,
+                    photos: allPhotos,
+                    analysis: allAnalysis
+                };
+
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `fretwear-backup-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+
+                URL.revokeObjectURL(url);
+                hideMenu();
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting data');
+            }
+        };
+
+        const importData = () => {
+            document.getElementById('file-input').click();
+        };
+
+        const handleFileImport = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importData = JSON.parse(e.target.result);
+
+                    // Validate import data structure
+                    if (!importData.guitars || !Array.isArray(importData.guitars)) {
+                        throw new Error('Invalid backup file format');
+                    }
+
+                    // Import guitars (this is a simplified version - in production you'd want more careful conflict handling)
+                    for (const guitar of importData.guitars) {
+                        await dbOperations.addGuitar(guitar);
+                    }
+
+                    alert('Data imported successfully!');
+                    showView('home');
+                    hideMenu();
+                } catch (error) {
+                    console.error('Import error:', error);
+                    alert('Error importing data. Please check the file format.');
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await initDB();
+                showView('home');
+            } catch (error) {
+                console.error('Database initialization error:', error);
+                alert('Error initializing app. Please refresh and try again.');
+            }
+        });
+
+        // Navigation event listeners
+        document.getElementById('back-btn').addEventListener('click', () => {
+            stopCamera(); // Stop camera if we're leaving photo capture
+            showView('home');
+        });
+
+        document.getElementById('menu-btn').addEventListener('click', showMenu);
+        document.getElementById('close-menu-btn').addEventListener('click', hideMenu);
+
+        // Guitar management
+        document.getElementById('add-guitar-btn').addEventListener('click', () => {
+            showView('add-guitar');
+        });
+
+        document.getElementById('add-guitar-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const guitar = {
+                make: formData.get('make'),
+                model: formData.get('model'),
+                year: formData.get('year') ? parseInt(formData.get('year')) : null,
+                condition: formData.get('condition'),
+                setupDate: formData.get('setupDate') || null
+            };
+
+            try {
+                const guitarId = await dbOperations.addGuitar(guitar);
+                const newGuitar = await dbOperations.getGuitar(guitarId);
+                currentGuitar = newGuitar;
+
+                // Reset form
+                e.target.reset();
+
+                // Go to photo capture to take baseline photos
+                showView('photo-capture');
+            } catch (error) {
+                console.error('Error adding guitar:', error);
+                alert('Error adding guitar. Please try again.');
+            }
+        });
+
+        // Photo capture
+        document.getElementById('take-photos-btn').addEventListener('click', () => {
+            showView('photo-capture');
+        });
+
+        document.getElementById('capture-btn').addEventListener('click', capturePhoto);
+
+        document.getElementById('cancel-capture-btn').addEventListener('click', () => {
+            stopCamera();
+            showView('guitar-detail', currentGuitar);
+        });
+
+        // Menu actions
+        document.getElementById('export-data-btn').addEventListener('click', exportData);
+        document.getElementById('import-data-btn').addEventListener('click', importData);
+        document.getElementById('file-input').addEventListener('change', handleFileImport);
+
+        document.getElementById('about-btn').addEventListener('click', () => {
+            alert('FretWear Tracker v1.0\n\nTrack your guitar\'s fret wear with photos and get data-driven maintenance recommendations.\n\nBuilt with love for guitarists who care about their instruments.');
+            hideMenu();
+        });
+
+        // Close menu when clicking outside
+        document.getElementById('menu-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'menu-modal') {
+                hideMenu();
+            }
+        });
